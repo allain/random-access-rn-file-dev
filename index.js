@@ -15,8 +15,10 @@ export default function fileAccessor(filePath) {
             RNRandomAccessRnFile.ensureFileExists(filePath).then(() => req.callback(null), req.callback)
         },
         read(req) {
+            console.log('Calling out to read')
             RNRandomAccessRnFile.read(filePath, req.size, req.offset).then(
                 data => {
+                    console.log('read data', data)
                     const buffer = bufferFrom(data, 'utf8')
                     if (buffer.length !== req.size) {
                         req.callback(new Error('Range not satisfiable'))
