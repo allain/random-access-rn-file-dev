@@ -67,7 +67,7 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
           f = new RandomAccessFile(filePath, "rw");
           f.seek(offset);
           f.write(data.getBytes());
-          promise.resolve();
+          promise.resolve(null);
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
         } finally {
@@ -94,7 +94,7 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
           f = new RandomAccessFile(filePath, "rw");
           final byte[] bytes = new byte[size];
           f.readFully(bytes);
-          promise.resolve(bytes);
+          promise.resolve(new String(bytes, "utf8");
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
         } finally {
