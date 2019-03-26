@@ -71,7 +71,7 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
         } finally {
-          if (f !== null) {
+          if (f != null) {
             try {
               f.close();
             } catch (IOException ioe) {
@@ -98,7 +98,7 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
         } finally {
-          if (f !== null) {
+          if (f != null) {
             try {
               f.close();
             } catch (IOException ioe) {
