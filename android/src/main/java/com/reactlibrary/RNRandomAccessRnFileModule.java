@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.io.IOException;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -51,6 +52,60 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
           }
         } catch (IOException ioe) {
           promise.reject("unable to create file: " + filePath);
+        }
+      }
+    });
+  }
+
+  @ReactMethod void write(final String filePath, final String data, final int offset, final Promise promise) {
+    threadPool.execute(new Runnable() {
+      @Override
+      public void run() {
+        RandomAccessFile f = null;
+        
+        try {
+          f = new RandomAccessFile(filePath, "rw");
+          f.seek(offset);
+          f.write(data.getBytes());
+          promise.resolve();
+        } catch (IOException ioe) {
+          promise.reject("unable to write to file: " + filePath);
+        } finally {
+          if (f !== null) {
+            try {
+              f.close();
+            } catch (IOException ioe) {
+              // Can't think of anything worth doing here
+              System.err.println(ioe);
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  @ReactMethod void read(final String filePath, final int size, final int offset, final Promise promise) {
+    threadPool.execute(new Runnable() {
+      @Override
+      public void run() {
+        RandomAccessFile f = null;
+        
+        try {
+          f = new RandomAccessFile(filePath, "rw");
+          final byte[] bytes = new byte[size];
+          f.readFully(bytes);
+          promise.resolve(bytes);
+        } catch (IOException ioe) {
+          promise.reject("unable to write to file: " + filePath);
+        } finally {
+          if (f !== null) {
+            try {
+              f.close();
+            } catch (IOException ioe) {
+              // Can't think of anything worth doing here
+              System.err.println(ioe);
+            }
+          }
         }
       }
     });
