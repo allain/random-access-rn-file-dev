@@ -94,7 +94,7 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
           f = new RandomAccessFile(filePath, "rw");
           final byte[] bytes = new byte[size];
           f.readFully(bytes);
-          promise.resolve(new String(bytes, "utf8");
+          promise.resolve(new String(bytes, "utf8"));
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
         } finally {
