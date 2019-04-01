@@ -1,8 +1,7 @@
 import path from 'path'
 import randomAccess from 'random-access-storage'
-
 import { NativeModules } from 'react-native';
-
+import { Buffer } from 'buffer'
 const { RNRandomAccessRnFile } = NativeModules;
 
 export const cachePath = RNRandomAccessRnFile.cachePath
@@ -21,8 +20,7 @@ export default function fileAccessor(filePath) {
             console.log('Calling out to read')
             RNRandomAccessRnFile.read(filePath, req.size, req.offset).then(
                 data => {
-                    console.log('read data', data)
-                    const buffer = bufferFrom(data, 'utf8')
+                    const buffer = Buffer.from(data, 'base64')
                     if (buffer.length !== req.size) {
                         req.callback(new Error('Range not satisfiable'))
                     } else {
@@ -33,8 +31,9 @@ export default function fileAccessor(filePath) {
             )
         },
         write(req) {
-            const data = new String(req.data, 'utf8')
-            RNRandomAccessRnFile.write(filePath, data, req.offset, 'utf8').then(
+            // req.data should be a buffer
+            const data = req.data.toString('base64');
+            RNRandomAccessRnFile.write(filePath, data, req.offset).then(
                 () => req.callback(null),
                 req.callback
             )

@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+import android.util.Base64;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -69,13 +69,10 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
         RandomAccessFile f = null;
         
         try {
-          System.out.println("OPENING FILE");
           f = new RandomAccessFile(filePath, "rw");
-          System.out.println("OPENED");
-          f.seek(offset * 2); // UTF-16 has 2 bytes per characters that we care about
-          System.out.println("SEEKED");
-          f.write(data.getBytes("UTF-16"));
-          System.out.println("RESOLVED");
+          f.seek(offset); // UTF-16 has 2 bytes per characters that we care about
+          byte bytes[] = Base64.decode(data, Base64.DEFAULT);
+          f.write(bytes);
           promise.resolve(null);
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
@@ -102,11 +99,15 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
         
         try {
           f = new RandomAccessFile(filePath, "rw");
-          final byte[] bytes = new byte[size*2];
+          final byte[] bytes = new byte[size];
+          f.seek(offset);
           f.readFully(bytes);
-          promise.resolve(new String(bytes, "UTF-16"));
+          promise.resolve(Base64.encodeToString(bytes, Base64.DEFAULT));
         } catch (IOException ioe) {
-          promise.reject("unable to write to file: " + filePath);
+          System.err.println(ioe);
+          promise.reject("unable to read file: " + filePath);
+        } catch (Exception e) {
+          promise.reject("Error " + e.toString());
         } finally {
           if (f != null) {
             try {
