@@ -12,7 +12,10 @@ export const tempPath = RNRandomAccessRnFile.tempPath
 export default function fileAccessor(filePath) {
     return randomAccess({
         open(req) {
-            RNRandomAccessRnFile.ensureFileExists(filePath).then(() => req.callback(null), req.callback)
+            RNRandomAccessRnFile.ensureFileExists(filePath).then(() => {
+                console.log('ENSURE EXISTS CALLED BACK')
+                req.callback(null)
+            }, req.callback)
         },
         read(req) {
             console.log('Calling out to read')

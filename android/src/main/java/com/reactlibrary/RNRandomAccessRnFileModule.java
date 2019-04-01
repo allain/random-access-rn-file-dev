@@ -41,6 +41,7 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
       @Override
       public void run() {
         try {
+          System.out.println("Ensuring File Exists: " + filePath);
           File f = new File(filePath);
           File parentDir = f.getParentFile();
           if (!parentDir.exists()) {
@@ -50,6 +51,8 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
           if (!f.exists()) {
             f.createNewFile();
           }
+          System.out.println("File Exists");
+          promise.resolve(null);
         } catch (IOException ioe) {
           promise.reject("unable to create file: " + filePath);
         }
@@ -57,16 +60,22 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
     });
   }
 
-  @ReactMethod void write(final String filePath, final String data, final int offset, final Promise promise) {
+  @ReactMethod 
+  public void write(final String filePath, final String data, final int offset, final Promise promise) {
+    System.out.println("Adding Write to threadPool");
     threadPool.execute(new Runnable() {
       @Override
       public void run() {
         RandomAccessFile f = null;
         
         try {
+          System.out.println("OPENING FILE");
           f = new RandomAccessFile(filePath, "rw");
-          f.seek(offset);
-          f.write(data.getBytes());
+          System.out.println("OPENED");
+          f.seek(offset * 2); // UTF-16 has 2 bytes per characters that we care about
+          System.out.println("SEEKED");
+          f.write(data.getBytes("UTF-16"));
+          System.out.println("RESOLVED");
           promise.resolve(null);
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
@@ -84,7 +93,8 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
     });
   }
   
-  @ReactMethod void read(final String filePath, final int size, final int offset, final Promise promise) {
+  @ReactMethod
+  public void read(final String filePath, final int size, final int offset, final Promise promise) {
     threadPool.execute(new Runnable() {
       @Override
       public void run() {
@@ -92,9 +102,9 @@ public class RNRandomAccessRnFileModule extends ReactContextBaseJavaModule {
         
         try {
           f = new RandomAccessFile(filePath, "rw");
-          final byte[] bytes = new byte[size];
+          final byte[] bytes = new byte[size*2];
           f.readFully(bytes);
-          promise.resolve(new String(bytes, "utf8"));
+          promise.resolve(new String(bytes, "UTF-16"));
         } catch (IOException ioe) {
           promise.reject("unable to write to file: " + filePath);
         } finally {
